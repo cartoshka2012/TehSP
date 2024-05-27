@@ -2,21 +2,24 @@ package com.example.mstore.controllers;
 
 
 import com.example.mstore.models.User;
+import com.example.mstore.repositories.UserRepository;
 import com.example.mstore.services.UserService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
 
+
 @Controller
 @RequiredArgsConstructor
+@Slf4j
 public class UserController {
     private final UserService userService;
+    private final UserRepository userRepository;
 
     @GetMapping("/login")
     public String login() {
@@ -46,36 +49,38 @@ public class UserController {
         return "user-info";
     }
     @GetMapping("/profile")
-    public String profile(Principal principal,
+    public String profile(@AuthenticationPrincipal User currentUser,
                           Model model) {
-        User user = userService.getUserByPrincipal(principal);
-        model.addAttribute("user", user);
-        model.addAttribute("userChannel", user);
-        model.addAttribute("subscriptionsCount", user.getSubscriptions().size());
-        model.addAttribute("subscribersCount", user.getSubscribers().size());
-        model.addAttribute("isCurrentUser", user.equals(user));
-        model.addAttribute("isSubscriber", user.getSubscribers().contains(user));
+        //User user = userService.getUserByPrincipal(principal);
+        model.addAttribute("user", currentUser);
+        model.addAttribute("userChannel", currentUser);
+        model.addAttribute("subscriptionsCount", currentUser.getSubscribersCount());
+        model.addAttribute("subscribersCount", currentUser.getSubscriptionsCount());
         return "profile";
     }
 
-    @GetMapping("subscribe/{user}")
+    @GetMapping("/user/subscribe/{id}")
     public String subscribe(
-            @AuthenticationPrincipal User currentUser,
-            @PathVariable User user
+            @PathVariable Long id,
+            @AuthenticationPrincipal User User
     ) {
-        userService.subscribe(currentUser, user);
 
-        return "user-info";
+        userService.subscribe(User, id);
+        userService.setSubscriptoinsCount(id, User.getId());
+        System.out.println("!!!!!!!!!!!!!!!!!!!!" + User.getId());
+        System.out.println("&&&&&&&&&&&&&&&" + userRepository.findUserById(id).getId());
+
+        return "/Sps";
     }
 
-    @GetMapping("unsubscribe/{user}")
+    @GetMapping("/user/unsubscribe/{id}")
     public String unsubscribe(
-            @AuthenticationPrincipal User currentUser,
-            @PathVariable User user
+            @PathVariable Long id,
+            @AuthenticationPrincipal User currentUser
     ) {
-        userService.unsubscribe(currentUser, user);
-
-        return "user-info";
+        userService.unsubscribe(currentUser, id);
+        userService.setUnsubscriptoinsCount(id, currentUser.getId());
+        return "/unsub";
     }
 
     @GetMapping("{type}/{user}/list")
@@ -95,4 +100,13 @@ public class UserController {
 
         return "subscriptions";
     }
+
+
+/*    @RequestMapping(value = "/", method = RequestMethod.GET)
+    public String displayHomePage(Model model, Principal user) {
+        if (user != null) {
+
+        }
+        return "blocks/navbar";
+    }*/
 }
