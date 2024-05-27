@@ -9,6 +9,10 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.time.LocalDateTime;
 import java.util.*;
 
+
+
+
+
 @Entity
 @Table(name = "users")
 @Data
@@ -40,26 +44,25 @@ public class User implements UserDetails {
     private LocalDateTime dateOfCreated;
 
 
-
-    @ManyToMany
-
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "user_subscriptions",
-            joinColumns = { @JoinColumn(name = "channel_id") },
-            inverseJoinColumns = { @JoinColumn(name = "subscriber_id") }
+            joinColumns = { @JoinColumn(name = "mySubscriptions") },
+            inverseJoinColumns = { @JoinColumn(name = "mySubscribers") }
     )
-    @Column(name = "subscribers")
     private Set<User> subscribers = new HashSet<>();
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "user_subscriptions",
-            joinColumns = { @JoinColumn(name = "subscriber_id") },
-            inverseJoinColumns = { @JoinColumn(name = "channel_id") }
+            joinColumns = { @JoinColumn(name = "mySubscribers") },
+            inverseJoinColumns = { @JoinColumn(name = "mySubscriptions") }
     )
-    @Column(name = "subscriptions")
     private Set<User> subscriptions = new HashSet<>();
 
+
+    private int subscribersCount = 0;
+    private int subscriptionsCount = 0;
 
 
 

@@ -3,7 +3,7 @@
         <a href="/">
             <span class="navbar-brand mb-0 h1">mstore</span>
         </a>
-        <#if user??>
+        <#if user?? >
             <div class="dropdown text-end">
                 <button class="btn btn-light my-2 my-sm-0" type="button"
                         onclick="window.location.href = '/profile'">

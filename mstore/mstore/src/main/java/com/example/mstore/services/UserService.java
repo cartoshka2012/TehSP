@@ -5,6 +5,7 @@ import com.example.mstore.models.enums.Role;
 import com.example.mstore.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -68,15 +69,44 @@ public class UserService {
         return userRepository.findByEmail(principal.getName());
     }
 
-    public void subscribe(User currentUser, User user) {
-        user.getSubscribers().add(currentUser);
+    public void subscribe(User currentUser, Long id) {
+        this.userRepository.findById(id).ifPresent(user -> {
+            user.getSubscribers().add(currentUser);
 
-        userRepository.save(user);
+            userRepository.save(user);
+        });
     }
 
-    public void unsubscribe(User currentUser, User user) {
-        user.getSubscribers().remove(currentUser);
-        userRepository.save(user);
+    public void unsubscribe(User currentUser, Long id) {
+        this.userRepository.findById(id).ifPresent(user -> {
+            log.info("Unsubscribe user with id = {}; email: {}", id, user.getEmail());
+            user.getSubscribers().remove(currentUser);
+            log.info("size" + user.getSubscribers().size());
+            userRepository.save(user);
+        });
+    }
+    public User getUserById(Long id){
+        return userRepository.findUserById(id);
+    }
+
+    public void setSubscriptoinsCount(Long id1, Long id2){
+        User user1 = userRepository.findById(id1).orElse(null);
+        User user2 = userRepository.findById(id2).orElse(null);
+        user1.setSubscriptionsCount(user1.getSubscriptionsCount() + 1);
+        user2.setSubscribersCount(user2.getSubscribersCount() + 1);
+        userRepository.save(user1);
+        userRepository.save(user2);
+
+    }
+
+    public void setUnsubscriptoinsCount(Long id1, Long id2){
+        User user1 = userRepository.findById(id1).orElse(null);
+        User user2 = userRepository.findById(id2).orElse(null);
+        user1.setSubscriptionsCount(user1.getSubscriptionsCount() - 1);
+        user2.setSubscribersCount(user2.getSubscribersCount() - 1);
+        userRepository.save(user1);
+        userRepository.save(user2);
+
     }
 
 }
